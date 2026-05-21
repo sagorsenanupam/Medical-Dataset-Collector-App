@@ -1,6 +1,6 @@
+import { useFormContext } from "@/context/FormContext";
 import { Picker } from "@react-native-picker/picker";
 import { router } from "expo-router";
-import { useState } from "react";
 import {
     Pressable,
     ScrollView,
@@ -11,13 +11,7 @@ import {
 } from "react-native";
 
 export default function IdentificationScreen() {
-  const [studyId, setStudyId] = useState("");
-  const [date, setDate] = useState("");
-  const [respondentName, setRespondentName] = useState("");
-  const [contactNumber, setContactNumber] = useState("");
-
-  const [relationship, setRelationship] = useState("Mother");
-  const [otherRelationship, setOtherRelationship] = useState("");
+  const { identification, updateIdentification } = useFormContext();
 
   return (
     <ScrollView style={styles.container}>
@@ -30,8 +24,8 @@ export default function IdentificationScreen() {
         <Text style={styles.label}>Study ID:</Text>
         <TextInput
           style={styles.input}
-          value={studyId}
-          onChangeText={setStudyId}
+          value={identification.studyId}
+          onChangeText={(value) => updateIdentification({ studyId: value })}
           placeholder="e.g., 1001"
         />
       </View>
@@ -40,8 +34,8 @@ export default function IdentificationScreen() {
         <Text style={styles.label}>Date:</Text>
         <TextInput
           style={styles.input}
-          value={date}
-          onChangeText={setDate}
+          value={identification.date}
+          onChangeText={(value) => updateIdentification({ date: value })}
           placeholder="DD/MM/YYYY"
         />
       </View>
@@ -50,8 +44,10 @@ export default function IdentificationScreen() {
         <Text style={styles.label}>Name of Respondent:</Text>
         <TextInput
           style={styles.input}
-          value={respondentName}
-          onChangeText={setRespondentName}
+          value={identification.respondentName}
+          onChangeText={(value) =>
+            updateIdentification({ respondentName: value })
+          }
           placeholder="Enter name"
         />
       </View>
@@ -60,8 +56,10 @@ export default function IdentificationScreen() {
         <Text style={styles.label}>Relationship to child:</Text>
         <View style={styles.pickerContainer}>
           <Picker
-            selectedValue={relationship}
-            onValueChange={(itemValue) => setRelationship(itemValue)}
+            selectedValue={identification.relationship}
+            onValueChange={(itemValue) =>
+              updateIdentification({ relationship: itemValue })
+            }
           >
             <Picker.Item label="Mother" value="Mother" />
             <Picker.Item label="Father" value="Father" />
@@ -71,13 +69,15 @@ export default function IdentificationScreen() {
         </View>
       </View>
 
-      {relationship === "Other" && (
+      {identification.relationship === "Other" && (
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Specify Other Relationship:</Text>
           <TextInput
             style={styles.input}
-            value={otherRelationship}
-            onChangeText={setOtherRelationship}
+            value={identification.otherRelationship}
+            onChangeText={(value) =>
+              updateIdentification({ otherRelationship: value })
+            }
             placeholder="e.g., Aunt, Uncle"
           />
         </View>
@@ -87,8 +87,10 @@ export default function IdentificationScreen() {
         <Text style={styles.label}>Contact Number:</Text>
         <TextInput
           style={styles.input}
-          value={contactNumber}
-          onChangeText={setContactNumber}
+          value={identification.contactNumber}
+          onChangeText={(value) =>
+            updateIdentification({ contactNumber: value })
+          }
           placeholder="01XXXXXXXXX"
           keyboardType="numeric"
         />
