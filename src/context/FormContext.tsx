@@ -1,4 +1,9 @@
 import {
+    getAccessToken,
+    updateExistingCSVOnDrive,
+    uploadCSVToGoogleDrive,
+} from "@/services/googleDriveService";
+import {
     BehaviouralData,
     ClinicalData,
     FormContextType,
@@ -7,6 +12,7 @@ import {
     QuestionnaireResponse,
     SociodemographicsData,
 } from "@/types/questionnaire";
+import { downloadCSV, generateCSV } from "@/utils/csvExport";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useCallback, useState } from "react";
 
@@ -95,6 +101,8 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
   const [clinical, setClinical] = useState<ClinicalData>(defaultClinical);
   const [nutritional, setNutritional] =
     useState<NutritionalData>(defaultNutritional);
+  const [driveFileId, setDriveFileId] = useState<string | null>(null);
+  const [isAutoSyncEnabled, setIsAutoSyncEnabled] = useState(true);
 
   const updateIdentification = useCallback(
     (data: Partial<IdentificationData>) => {
@@ -121,6 +129,58 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
   const updateNutritional = useCallback((data: Partial<NutritionalData>) => {
     setNutritional((prev) => ({ ...prev, ...data }));
   }, []);
+
+  const syncCSVToGoogleDrive = useCallback(async () => {
+    try {
+      if (!isAutoSyncEnabled) {
+        console.log("Auto-sync disabled");
+        return;
+      }
+
+      // Get all responses
+      const allResponsesStr = await AsyncStorage.getItem(
+        "questionnaire_responses",
+      );
+      const allResponseIds = allResponsesStr ? JSON.parse(allResponsesStr) : [];
+
+      const responses: QuestionnaireResponse[] = [];
+      for (const id of allResponseIds) {
+        const data = await AsyncStorage.getItem(`questionnaire_${id}`);
+        if (data) {
+          responses.push(JSON.parse(data));
+        }
+      }
+
+      // Generate CSV
+      const csv = generateCSV(responses);
+
+      // Save locally
+      const filename = "diarrhea_questionnaire_data.csv";
+      await downloadCSV(csv, filename);
+
+      // Try to authenticate and upload/update on Drive
+      try {
+        const accessToken = await getAccessToken();
+        if (driveFileId) {
+          // Update existing file
+          await updateExistingCSVOnDrive(driveFileId, csv);
+          console.log("CSV updated on Google Drive");
+        } else {
+          // Upload new file
+          const result = await uploadCSVToGoogleDrive(csv, filename);
+          setDriveFileId(result.id);
+          console.log("CSV uploaded to Google Drive");
+        }
+      } catch (error) {
+        console.log(
+          "Google Drive sync not available, but local CSV saved:",
+          error,
+        );
+      }
+    } catch (error) {
+      console.error("Error syncing CSV:", error);
+    }
+  }, [driveFileId, isAutoSyncEnabled]);
 
   const saveResponse = useCallback(async (): Promise<string> => {
     try {
@@ -152,12 +212,22 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
         JSON.stringify(allResponses),
       );
 
+      // Sync CSV to local storage and Google Drive
+      await syncCSVToGoogleDrive();
+
       return id;
     } catch (error) {
       console.error("Error saving response:", error);
       throw error;
     }
-  }, [identification, sociodemographics, behavioural, clinical, nutritional]);
+  }, [
+    identification,
+    sociodemographics,
+    behavioural,
+    clinical,
+    nutritional,
+    syncCSVToGoogleDrive,
+  ]);
 
   const resetForm = useCallback(() => {
     setIdentification(defaultIdentification);
@@ -207,25 +277,35 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
-  const deleteResponse = useCallback(async (id: string) => {
-    try {
-      await AsyncStorage.removeItem(`questionnaire_${id}`);
+  const deleteResponse = useCallback(
+    async (id: string) => {
+      try {
+        await AsyncStorage.removeItem(`questionnaire_${id}`);
 
-      const allResponsesStr = await AsyncStorage.getItem(
-        "questionnaire_responses",
-      );
-      let allResponses = allResponsesStr ? JSON.parse(allResponsesStr) : [];
-      allResponses = allResponses.filter(
-        (responseId: string) => responseId !== id,
-      );
-      await AsyncStorage.setItem(
-        "questionnaire_responses",
-        JSON.stringify(allResponses),
-      );
-    } catch (error) {
-      console.error("Error deleting response:", error);
-      throw error;
-    }
+        const allResponsesStr = await AsyncStorage.getItem(
+          "questionnaire_responses",
+        );
+        let allResponses = allResponsesStr ? JSON.parse(allResponsesStr) : [];
+        allResponses = allResponses.filter(
+          (responseId: string) => responseId !== id,
+        );
+        await AsyncStorage.setItem(
+          "questionnaire_responses",
+          JSON.stringify(allResponses),
+        );
+
+        // Re-sync CSV after deleting a response
+        await syncCSVToGoogleDrive();
+      } catch (error) {
+        console.error("Error deleting response:", error);
+        throw error;
+      }
+    },
+    [syncCSVToGoogleDrive],
+  );
+
+  const toggleAutoSync = useCallback((enabled: boolean) => {
+    setIsAutoSyncEnabled(enabled);
   }, []);
 
   const value: FormContextType = {
@@ -244,6 +324,9 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
     loadResponse,
     getAllResponses,
     deleteResponse,
+    syncCSVToGoogleDrive,
+    isAutoSyncEnabled,
+    toggleAutoSync,
   };
 
   return <FormContext.Provider value={value}>{children}</FormContext.Provider>;

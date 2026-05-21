@@ -104,4 +104,9 @@ export interface FormContextType {
   loadResponse: (id: string) => Promise<void>;
   getAllResponses: () => Promise<QuestionnaireResponse[]>;
   deleteResponse: (id: string) => Promise<void>;
+
+  // Google Drive sync functions
+  syncCSVToGoogleDrive: () => Promise<void>;
+  isAutoSyncEnabled: boolean;
+  toggleAutoSync: (enabled: boolean) => void;
 }

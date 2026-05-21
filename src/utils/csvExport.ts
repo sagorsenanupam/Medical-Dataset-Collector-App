@@ -1,4 +1,5 @@
 import { QuestionnaireResponse } from "@/types/questionnaire";
+import RNFetchBlob from "rn-fetch-blob";
 
 export const generateCSV = (responses: QuestionnaireResponse[]): string => {
   if (responses.length === 0) {
@@ -102,10 +103,16 @@ export const generateCSV = (responses: QuestionnaireResponse[]): string => {
   return [header, ...rows].join("\n");
 };
 
+
 export const downloadCSV = async (csv: string, filename: string) => {
-  // This is a placeholder for actual file download implementation
-  // In a real app, you'd use react-native-fs or similar
-  console.log("CSV Content:");
-  console.log(csv);
-  return csv;
+  try {
+    // Save CSV to Documents folder on device
+    const path = `${RNFetchBlob.fs.dirs.DocumentDir}/${filename}`;
+    await RNFetchBlob.fs.writeFile(path, csv, "utf8");
+    console.log("CSV saved to:", path);
+    return path;
+  } catch (error) {
+    console.error("Failed to save CSV:", error);
+    throw error;
+  }
 };
