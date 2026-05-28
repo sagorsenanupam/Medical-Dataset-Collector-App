@@ -1,14 +1,14 @@
-import { DatePickerFields } from "@/components/date-picker-fields";
+import SimpleDateInput from "@/components/simple-date-input";
 import { useFormContext } from "@/context/FormContext";
 import { Picker } from "@react-native-picker/picker";
 import { router } from "expo-router";
 import {
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 
 export default function IdentificationScreen() {
@@ -31,7 +31,7 @@ export default function IdentificationScreen() {
         />
       </View>
 
-      <DatePickerFields
+      <SimpleDateInput
         label="Date:"
         value={identification.date}
         onChange={(value) => updateIdentification({ date: value })}

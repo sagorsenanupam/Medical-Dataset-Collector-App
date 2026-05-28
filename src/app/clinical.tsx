@@ -1,14 +1,14 @@
-import { DatePickerFields } from "@/components/date-picker-fields";
+import SimpleDateInput from "@/components/simple-date-input";
 import { useFormContext } from "@/context/FormContext";
 import { Picker } from "@react-native-picker/picker";
 import { router } from "expo-router";
 import {
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 
 export default function ClinicalScreen() {
@@ -22,7 +22,7 @@ export default function ClinicalScreen() {
 
       <Text style={styles.sectionTitle}>History:</Text>
 
-      <DatePickerFields
+      <SimpleDateInput
         label="Date of symptom onset:"
         value={clinical.symptomOnset}
         onChange={(value) => updateClinical({ symptomOnset: value })}
