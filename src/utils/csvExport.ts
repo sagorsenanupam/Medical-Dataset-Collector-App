@@ -1,5 +1,4 @@
 import { QuestionnaireResponse } from "@/types/questionnaire";
-import RNFetchBlob from "rn-fetch-blob";
 
 export const generateCSV = (responses: QuestionnaireResponse[]): string => {
   if (responses.length === 0) {
@@ -103,16 +102,14 @@ export const generateCSV = (responses: QuestionnaireResponse[]): string => {
   return [header, ...rows].join("\n");
 };
 
-
 export const downloadCSV = async (csv: string, filename: string) => {
   try {
-    // Save CSV to Documents folder on device
-    const path = `${RNFetchBlob.fs.dirs.DocumentDir}/${filename}`;
-    await RNFetchBlob.fs.writeFile(path, csv, "utf8");
-    console.log("CSV saved to:", path);
-    return path;
+    // For now, just return the CSV content
+    // Local file storage will be implemented after OAuth configuration
+    console.log("CSV generated:", filename);
+    return csv;
   } catch (error) {
-    console.error("Failed to save CSV:", error);
+    console.error("Failed to process CSV:", error);
     throw error;
   }
 };

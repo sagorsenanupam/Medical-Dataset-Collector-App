@@ -1,9 +1,9 @@
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import RNFetchBlob from "rn-fetch-blob";
 
 export const initializeGoogleSignIn = () => {
   GoogleSignin.configure({
-    webClientId: "YOUR_WEB_CLIENT_ID.apps.googleusercontent.com",
+    webClientId:
+      "1084761733202-sdlr3mu9l38t4bc783bsl7vi3sg2u34f.apps.googleusercontent.com",
     offlineAccess: true,
     scopes: [
       "https://www.googleapis.com/auth/drive.file",
@@ -39,11 +39,6 @@ export const uploadCSVToGoogleDrive = async (
 ) => {
   try {
     const accessToken = await getAccessToken();
-
-    // First, save CSV locally to Documents folder
-    const path = `${RNFetchBlob.fs.dirs.DocumentDir}/${filename}`;
-    await RNFetchBlob.fs.writeFile(path, csvContent, "utf8");
-    console.log("CSV saved locally:", path);
 
     // Upload to Google Drive
     const metadata = {
@@ -110,6 +105,72 @@ export const updateExistingCSVOnDrive = async (
     return await response.json();
   } catch (error) {
     console.error("Failed to update CSV on Google Drive:", error);
+    throw error;
+  }
+};
+
+export const appendToGoogleSheet = async (
+  spreadsheetId: string,
+  values: string[][],
+  range: string = "Sheet1!A:Z",
+) => {
+  try {
+    const accessToken = await getAccessToken();
+
+    const response = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}:append?valueInputOption=USER_ENTERED`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ values }),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`Append failed: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    console.log("Data appended to Google Sheet:", result);
+    return result;
+  } catch (error) {
+    console.error("Failed to append to Google Sheet:", error);
+    throw error;
+  }
+};
+
+export const createGoogleSheet = async (title: string) => {
+  try {
+    const accessToken = await getAccessToken();
+
+    const response = await fetch(
+      "https://sheets.googleapis.com/v4/spreadsheets",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          properties: {
+            title: title,
+          },
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`Sheet creation failed: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    console.log("Google Sheet created:", result.spreadsheetId);
+    return result;
+  } catch (error) {
+    console.error("Failed to create Google Sheet:", error);
     throw error;
   }
 };
