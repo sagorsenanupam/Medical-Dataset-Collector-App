@@ -1,6 +1,14 @@
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { Platform } from "react-native";
+
+const isWeb = Platform.OS === "web";
 
 export const initializeGoogleSignIn = () => {
+  if (isWeb) {
+    console.log("Google Sign-In is disabled on web in this build.");
+    return;
+  }
+
   GoogleSignin.configure({
     webClientId:
       "1084761733202-sdlr3mu9l38t4bc783bsl7vi3sg2u34f.apps.googleusercontent.com",
@@ -14,6 +22,11 @@ export const initializeGoogleSignIn = () => {
 
 export const signInToGoogle = async () => {
   try {
+    if (isWeb) {
+      console.log("Google Sign-In is not available on web.");
+      return null;
+    }
+
     await GoogleSignin.hasPlayServices();
     const userInfo = await GoogleSignin.signIn();
     return userInfo;
@@ -25,6 +38,11 @@ export const signInToGoogle = async () => {
 
 export const getAccessToken = async () => {
   try {
+    if (isWeb) {
+      console.log("Google access token is not available on web.");
+      return "";
+    }
+
     const tokens = await GoogleSignin.getTokens();
     return tokens.accessToken;
   } catch (error) {
@@ -38,6 +56,11 @@ export const uploadCSVToGoogleDrive = async (
   filename: string,
 ) => {
   try {
+    if (isWeb) {
+      console.log("Skipping Google Drive upload on web.");
+      return null;
+    }
+
     const accessToken = await getAccessToken();
 
     // Upload to Google Drive
@@ -83,6 +106,11 @@ export const updateExistingCSVOnDrive = async (
   csvContent: string,
 ) => {
   try {
+    if (isWeb) {
+      console.log("Skipping Google Drive update on web.");
+      return null;
+    }
+
     const accessToken = await getAccessToken();
 
     const response = await fetch(
@@ -115,6 +143,11 @@ export const appendToGoogleSheet = async (
   range: string = "Sheet1!A:Z",
 ) => {
   try {
+    if (isWeb) {
+      console.log("Skipping Google Sheets append on web.");
+      return null;
+    }
+
     const accessToken = await getAccessToken();
 
     const response = await fetch(
@@ -144,6 +177,11 @@ export const appendToGoogleSheet = async (
 
 export const createGoogleSheet = async (title: string) => {
   try {
+    if (isWeb) {
+      console.log("Skipping Google Sheets creation on web.");
+      return null;
+    }
+
     const accessToken = await getAccessToken();
 
     const response = await fetch(
@@ -177,6 +215,11 @@ export const createGoogleSheet = async (title: string) => {
 
 export const signOutFromGoogle = async () => {
   try {
+    if (isWeb) {
+      console.log("Google Sign-Out is not available on web.");
+      return;
+    }
+
     await GoogleSignin.signOut();
     console.log("Signed out from Google");
   } catch (error) {

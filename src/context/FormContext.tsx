@@ -1,5 +1,4 @@
 import {
-    getAccessToken,
     updateExistingCSVOnDrive,
     uploadCSVToGoogleDrive,
 } from "@/services/googleDriveService";
@@ -15,6 +14,7 @@ import {
 import { downloadCSV, generateCSV } from "@/utils/csvExport";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useCallback, useState } from "react";
+import { Platform } from "react-native";
 
 const defaultIdentification: IdentificationData = {
   studyId: "",
@@ -137,6 +137,13 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
+      if (Platform.OS === "web") {
+        console.log(
+          "Skipping Google Drive sync on web; saving local CSV only.",
+        );
+        return;
+      }
+
       // Get all responses
       const allResponsesStr = await AsyncStorage.getItem(
         "questionnaire_responses",
@@ -160,7 +167,6 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // Try to authenticate and upload/update on Drive
       try {
-        const accessToken = await getAccessToken();
         if (driveFileId) {
           // Update existing file
           await updateExistingCSVOnDrive(driveFileId, csv);
