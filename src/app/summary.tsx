@@ -180,7 +180,10 @@ export default function SummaryScreen() {
       </View>
 
       <View style={styles.buttonContainer}>
-        <Pressable style={styles.buttonBack} onPress={() => router.back()}>
+        <Pressable
+          style={styles.buttonBack}
+          onPress={() => router.push("/nutritional")}
+        >
           <Text style={styles.buttonText}>← Edit</Text>
         </Pressable>
         <Pressable style={styles.customButton} onPress={handleSaveResponse}>

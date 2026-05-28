@@ -308,7 +308,10 @@ export default function BehaviouralScreen() {
       </View>
 
       <View style={styles.buttonContainer}>
-        <Pressable style={styles.buttonBack} onPress={() => router.back()}>
+        <Pressable
+          style={styles.buttonBack}
+          onPress={() => router.push("/sociodemographics")}
+        >
           <Text style={styles.buttonText}>← Back</Text>
         </Pressable>
         <Pressable

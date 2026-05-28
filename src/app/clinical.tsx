@@ -1,3 +1,4 @@
+import { DatePickerFields } from "@/components/date-picker-fields";
 import { useFormContext } from "@/context/FormContext";
 import { Picker } from "@react-native-picker/picker";
 import { router } from "expo-router";
@@ -21,15 +22,11 @@ export default function ClinicalScreen() {
 
       <Text style={styles.sectionTitle}>History:</Text>
 
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Date of symptom onset:</Text>
-        <TextInput
-          style={styles.input}
-          value={clinical.symptomOnset}
-          onChangeText={(value) => updateClinical({ symptomOnset: value })}
-          placeholder="DD/MM/YYYY"
-        />
-      </View>
+      <DatePickerFields
+        label="Date of symptom onset:"
+        value={clinical.symptomOnset}
+        onChange={(value) => updateClinical({ symptomOnset: value })}
+      />
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Duration of diarrhoea (days):</Text>
@@ -222,7 +219,10 @@ export default function ClinicalScreen() {
       </View>
 
       <View style={styles.buttonContainer}>
-        <Pressable style={styles.buttonBack} onPress={() => router.back()}>
+        <Pressable
+          style={styles.buttonBack}
+          onPress={() => router.push("/behavioural")}
+        >
           <Text style={styles.buttonText}>← Back</Text>
         </Pressable>
         <Pressable

@@ -1,3 +1,4 @@
+import { DatePickerFields } from "@/components/date-picker-fields";
 import { Picker } from "@react-native-picker/picker";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -36,15 +37,7 @@ export default function IdentificationScreen() {
         />
       </View>
 
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Date:</Text>
-        <TextInput
-          style={styles.input}
-          value={date}
-          onChangeText={setDate}
-          placeholder="DD/MM/YYYY"
-        />
-      </View>
+      <DatePickerFields label="Date:" value={date} onChange={setDate} />
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Name of Respondent:</Text>

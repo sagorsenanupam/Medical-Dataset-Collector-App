@@ -191,7 +191,7 @@ export default function SociodemographicsScreen() {
       </View>
 
       <View style={styles.buttonContainer}>
-        <Pressable style={styles.buttonBack} onPress={() => router.back()}>
+        <Pressable style={styles.buttonBack} onPress={() => router.push("/")}>
           <Text style={styles.buttonText}>← Back</Text>
         </Pressable>
         <Pressable
