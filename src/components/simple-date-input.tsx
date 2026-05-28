@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { DatePickerFields } from "./date-picker-fields";
 
 type SimpleDateInputProps = {
@@ -14,6 +14,7 @@ export default function SimpleDateInput({
   onChange,
 }: SimpleDateInputProps) {
   const [expanded, setExpanded] = useState(false);
+  const [editValue, setEditValue] = useState(value || "");
 
   return (
     <View style={styles.container}>
@@ -26,14 +27,39 @@ export default function SimpleDateInput({
       </Pressable>
 
       {expanded && (
-        <DatePickerFields
-          label={""}
-          value={value}
-          onChange={(v) => {
-            onChange(v);
-            setExpanded(false);
-          }}
-        />
+        <View>
+          <TextInput
+            style={styles.input}
+            value={editValue}
+            onChangeText={setEditValue}
+            placeholder="DD/MM/YYYY"
+            onBlur={() => {
+              // basic pass-through, user may type valid formatted date
+              onChange(editValue);
+            }}
+          />
+
+          <DatePickerFields
+            label={""}
+            value={value}
+            onChange={(v) => {
+              onChange(v);
+              setExpanded(false);
+            }}
+          />
+          <View style={styles.rowButtons}>
+            <Pressable
+              style={styles.clearButton}
+              onPress={() => {
+                setEditValue("");
+                onChange("");
+                setExpanded(false);
+              }}
+            >
+              <Text style={styles.clearText}>Clear</Text>
+            </Pressable>
+          </View>
+        </View>
       )}
     </View>
   );
@@ -61,5 +87,24 @@ const styles = StyleSheet.create({
   },
   boxText: {
     color: "#000",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 8,
+    borderRadius: 4,
+    marginBottom: 10,
+  },
+  rowButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  clearButton: {
+    backgroundColor: "#f00",
+    padding: 10,
+    borderRadius: 5,
+  },
+  clearText: {
+    color: "#fff",
   },
 });
