@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { DatePickerFields } from "./date-picker-fields";
 
@@ -16,13 +16,17 @@ export default function SimpleDateInput({
   const [expanded, setExpanded] = useState(false);
   const [editValue, setEditValue] = useState(value || "");
 
+  useEffect(() => {
+    setEditValue(value || "");
+  }, [value]);
+
   return (
     <View style={styles.container}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
 
       <Pressable style={styles.box} onPress={() => setExpanded((s) => !s)}>
-        <Text style={value ? styles.boxText : styles.placeholder}>
-          {value || "DD/MM/YYYY"}
+        <Text style={editValue ? styles.boxText : styles.placeholder}>
+          {editValue || "DD/MM/YYYY"}
         </Text>
       </Pressable>
 
@@ -41,8 +45,9 @@ export default function SimpleDateInput({
 
           <DatePickerFields
             label={""}
-            value={value}
+            value={editValue}
             onChange={(v) => {
+              setEditValue(v);
               onChange(v);
               setExpanded(false);
             }}
